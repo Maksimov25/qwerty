@@ -79,6 +79,7 @@ def GSK_2011(sk1, sk2, parameters_path, df=None):
             float(results_vector[2]),
         ])
 
+    # Создание DataFrame с правильными колонками
     df_result = pd.DataFrame(transformed, columns=["Name", "X", "Y", "Z"])
 
     return df_result
