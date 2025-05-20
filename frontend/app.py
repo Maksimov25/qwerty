@@ -6,6 +6,8 @@ import base64
 from io import BytesIO
 
 BACKEND_URL = "http://localhost:8000"
+API_URL = "http://localhost:8000"
+
 
 st.set_page_config(page_title="Преобразование координат", layout="wide")
 st.title("📍 Система преобразования координат")
@@ -42,12 +44,16 @@ if uploaded_file is not None:
         # Отправка на бэкенд
         if st.button("🚀 Начать преобразование"):
             files = {
-                "file": (uploaded_file.name, uploaded_file.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            "file": (uploaded_file.name, uploaded_file.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
             }
+            data = {
+                "sk1": initial_system,
+                "sk2": target_system
+                }
             response = requests.post(
-                f"{BACKEND_URL}/transform",
-                params={"sk1": initial_system, "sk2": target_system},
-                files=files
+            f"{BACKEND_URL}/transform",
+            files=files,
+            data=data
             )
 
             if response.status_code == 200:

@@ -41,13 +41,13 @@ def GSK_2011(sk1, sk2, parameters_path, df=None):
 
     formula = (1 + m) * Matrix([[1, ωz, -ωy], [-ωz, 1, ωx], [ωy, -ωx, 1]]) @ Matrix([[X], [Y], [Z]]) + Matrix([[ΔX], [ΔY], [ΔZ]])
 
-    with open(parameters_path, 'r', encoding='utf-8') as f:
+    with open("parameters_path", "r", encoding="utf-8") as f:
         parameters = json.load(f)
 
     if sk1 not in parameters:
         raise ValueError(f"Система {sk1} не найдена в {parameters_path}")
 
-    param = parameters[sk1]
+    param = parameters.json[sk1]
     elements_const = {
         ΔX: param["ΔX"],
         ΔY: param["ΔY"],
