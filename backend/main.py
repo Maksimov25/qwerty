@@ -41,13 +41,13 @@ def GSK_2011(sk1, sk2, parameters_path, df=None):
 
     formula = (1 + m) * Matrix([[1, ωz, -ωy], [-ωz, 1, ωx], [ωy, -ωx, 1]]) @ Matrix([[X], [Y], [Z]]) + Matrix([[ΔX], [ΔY], [ΔZ]])
 
-    with open("parameters_path", "r", encoding="utf-8") as f:
+    with open(parameters_path, 'r', encoding='utf-8') as f:
         parameters = json.load(f)
 
     if sk1 not in parameters:
         raise ValueError(f"Система {sk1} не найдена в {parameters_path}")
 
-    param = parameters.json[sk1]
+    param = parameters[sk1]
     elements_const = {
         ΔX: param["ΔX"],
         ΔY: param["ΔY"],
@@ -148,9 +148,11 @@ def generate_report_md(df_before, sk1, sk2, parameters_path, md_path):
 
     return df_after
 
+
 # ---------------------
 # Маршруты FastAPI
 # ---------------------
+
 @app.get("/systems")
 async def get_systems():
     try:
@@ -159,7 +161,7 @@ async def get_systems():
         return {"systems": list(params.keys())}
     except Exception as e:
         return {"error": str(e), "systems": []}
-    
+
 @app.post("/transform")
 async def transform_file(
     file: UploadFile = File(...),
