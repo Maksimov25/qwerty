@@ -24,7 +24,7 @@ app.add_middleware(
 # Функции для работы с координатами
 # ---------------------
 
-def load_parameters(path="parameters.json"):
+def load_parameters(path="backend/parameters.json"):
     """Загружает параметры из JSON"""
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -212,7 +212,7 @@ def generate_report_md(df_before, sk1, sk2, parameters_path, md_path):
 @app.get("/systems")
 async def get_systems():
     try:
-        with open("parameters.json", "r", encoding="utf-8") as f:
+        with open("backend/parameters.json", "r", encoding="utf-8") as f:
             params = json.load(f)
         return {"systems": list(params.keys())}
     except Exception as e:
@@ -235,7 +235,7 @@ async def transform_file(
             raise HTTPException(status_code=400, detail=f"Файл должен содержать колонки: {required_columns}")
 
         # Загрузка параметров
-        parameters_path = "parameters.json"
+        parameters_path = "backend/parameters.json"
         params = load_parameters(parameters_path)
 
         # Проверка наличия путей
