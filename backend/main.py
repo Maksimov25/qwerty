@@ -208,6 +208,16 @@ def generate_report_md(df_before, sk1, sk2, parameters_path, md_path):
 # ---------------------
 # Маршруты FastAPI
 # ---------------------
+@app.get("/")
+async def read_root():
+    return {
+        "API": "Coordinate Transformation Service",
+        "endpoints": {
+            "systems": "/systems",
+            "transform": "/transform"
+        },
+        "documentation": "/docs"
+    }
 
 @app.get("/systems")
 async def get_systems():
@@ -267,6 +277,3 @@ async def transform_file(
         return {"status": "error", "message": str(e)}
 
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
