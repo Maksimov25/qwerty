@@ -6,7 +6,7 @@ import base64
 from io import BytesIO
 
 
-BACKEND_URL = ("qwerty-66k6r7kfrufbkhftz4j7hb.streamlit.app")
+BACKEND_URL = ("https://qwerty-66k6r7kfrufbkhftz4j7hb.streamlit.app")
 #http://localhost:8000
 
 st.title("📍 Система преобразования координат")
