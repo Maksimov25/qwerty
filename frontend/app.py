@@ -6,7 +6,7 @@ import base64
 from io import BytesIO
 
 
-BACKEND_URL = ("https://qwerty-0ykp.onrender.com")
+BACKEND_URL = "https://qwerty-0ykp.onrender.com"
 #BACKEND_URL = "http://localhost:8000"  # Для локального тестирования
 
 st.title("📍 Система преобразования координат")
