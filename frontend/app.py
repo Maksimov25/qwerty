@@ -5,7 +5,7 @@ from datetime import datetime
 import base64
 from io import BytesIO
 
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "https://qwe3.onrender.com"
 
 st.set_page_config(page_title="Преобразование координат", layout="wide")
 st.title("📍 Система преобразования координат")
