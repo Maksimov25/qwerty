@@ -20,16 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Корневой endpoint для проверки работы API
-@app.get("/")
-async def root():
-    return {
-        "message": "Coordinate Conversion API is running",
-        "docs": "/docs",
-        "redoc": "/redoc"
-    }
-
-
 # ---------------------
 # Функции для работы с координатами
 # ---------------------
