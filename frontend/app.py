@@ -6,7 +6,8 @@ import base64
 from io import BytesIO
 
 
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = ("qwerty-66k6r7kfrufbkhftz4j7hb.streamlit.app")
+#http://localhost:8000
 
 st.title("📍 Система преобразования координат")
 st.markdown("Загрузите Excel-файл с координатами x, y, z для преобразования.")
