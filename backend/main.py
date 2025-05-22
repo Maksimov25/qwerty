@@ -265,3 +265,8 @@ async def transform_file(
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
