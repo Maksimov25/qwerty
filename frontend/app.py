@@ -7,7 +7,7 @@ from io import BytesIO
 
 
 BACKEND_URL = ("https://qwerty-0ykp.onrender.com")
-#http://localhost:8000
+#BACKEND_URL = "http://localhost:8000"  # Для локального тестирования
 
 st.title("📍 Система преобразования координат")
 st.markdown("Загрузите Excel-файл с координатами x, y, z для преобразования.")
