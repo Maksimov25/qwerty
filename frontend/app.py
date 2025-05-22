@@ -2,6 +2,9 @@ import streamlit as st
 import requests
 import pandas as pd
 from datetime import datetime
+import base64
+from io import BytesIO
+
 
 BACKEND_URL = "http://localhost:8000"
 
@@ -46,7 +49,9 @@ if uploaded_file is not None:
                 result = response.json()
                 # Показываем результаты
                 st.success("✅ Преобразование завершено!")
-                transformed_df = pd.DataFrame(result["data"])
+                # Декодируем и читаем Excel-файл
+                excel_data = base64.b64decode(result["data"])
+                transformed_df = pd.read_excel(BytesIO(excel_data))
                 st.subheader("📊 Результаты преобразования")
                 st.dataframe(transformed_df)
                 # Отчет
