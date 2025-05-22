@@ -86,25 +86,34 @@ def GSK_2011(sk1, sk2, parameters_path, df=None):
 
     return df_result
 
+
 def generate_report_md(df_before, sk1, sk2, parameters_path, md_path):
     ΔX, ΔY, ΔZ, ωx, ωy, ωz, m = symbols('ΔX ΔY ΔZ ωx ωy ωz m')
     X, Y, Z = symbols('X Y Z')
-    general_formula = (1 + m) * Matrix([[1, ωz, -ωy], [-ωz, 1, ωx], [ωy, -ωx, 1]]) @ Matrix([[X], [Y], [Z]]) + Matrix([[ΔX], [ΔY], [ΔZ]])
+    general_formula = (1 + m) * Matrix([[1, ωz, -ωy], [-ωz, 1, ωx], [ωy, -ωx, 1]]) @ Matrix([[X], [Y], [Z]]) + Matrix(
+        [[ΔX], [ΔY], [ΔZ]])
 
     with open(parameters_path, 'r', encoding='utf-8') as f:
         params = json.load(f)
     p = params.get(sk1)
     if p is None:
         raise ValueError(f"Система {sk1} не найдена в {parameters_path}")
+
+    # Конвертируем параметры в float для точного отображения
     subs_common = {
-        ΔX: p["ΔX"], ΔY: p["ΔY"], ΔZ: p["ΔZ"],
-        ωx: p["ωx"], ωy: p["ωy"], ωz: p["ωz"],
-        m: p["m"] * 1e-6
+        ΔX: float(p["ΔX"]),
+        ΔY: float(p["ΔY"]),
+        ΔZ: float(p["ΔZ"]),
+        ωx: float(p["ωx"]),
+        ωy: float(p["ωy"]),
+        ωz: float(p["ωz"]),
+        m: float(p["m"]) * 1e-6
     }
 
+    # Вычисляем преобразованные координаты
     rows = []
     for _, r in df_before.iterrows():
-        subs = {**subs_common, X: r["X"], Y: r["Y"], Z: r["Z"]}
+        subs = {**subs_common, X: float(r["X"]), Y: float(r["Y"]), Z: float(r["Z"])}
         rv = general_formula.subs(subs).applyfunc(N)
         rows.append({
             "Name": r["Name"],
@@ -114,43 +123,87 @@ def generate_report_md(df_before, sk1, sk2, parameters_path, md_path):
         })
     df_after = pd.DataFrame(rows)
 
+    # Генерация отчета
     with open(md_path, 'w', encoding='utf-8') as md:
-        md.write("# Отчёт по преобразованию координат\n")
-        md.write(f"**Исходная система**: {sk1}\n")
-        md.write(f"**Конечная система**: {sk2}\n\n")
+        md.write("# Отчёт по преобразованию координат\n\n")
+        md.write(f"**Исходная система координат:** {sk1}\n\n")
+        md.write(f"**Целевая система координат:** {sk2}\n\n")
+        md.write(f"**Дата преобразования:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
-        md.write("## 1. Общая формула\n\n")
+        md.write("## 1. Общая формула преобразования\n\n")
+        md.write("Общая формула преобразования координат между системами:\n\n")
         md.write(f"$$\n{latex(general_formula)}\n$$\n\n")
 
-        md.write("## 2. Формула с подстановкой параметров\n\n")
-        formula_p = general_formula.subs(subs_common)
-        md.write(f"$$\n{latex(formula_p)}\n$$\n\n")
+        md.write("## 2. Параметры преобразования\n\n")
+        md.write("Использованные параметры преобразования:\n\n")
+        md.write(f"- ΔX = {p['ΔX']} м\n")
+        md.write(f"- ΔY = {p['ΔY']} м\n")
+        md.write(f"- ΔZ = {p['ΔZ']} м\n")
+        md.write(f"- ωx = {p['ωx']} рад\n")
+        md.write(f"- ωy = {p['ωy']} рад\n")
+        md.write(f"- ωz = {p['ωz']} рад\n")
+        md.write(f"- m = {p['m']} ppm\n\n")
 
-        md.write("## 3. Пример для первой точки\n\n")
-        first = df_before.iloc[0]
-        md.write(f"- Исходные: $X={first['X']},\\;Y={first['Y']},\\;Z={first['Z']}$\n")
-        subs1 = {**subs_common, X: first["X"], Y: first["Y"], Z: first["Z"]}
-        f3 = general_formula.subs(subs1)
-        f3n = f3.applyfunc(N)
-        md.write(f"- Подстановка в формулу:\n  $$\n{latex(f3)}\n$$\n")
-        md.write(f"- Численный результат: $X'={f3n[0]},\\;Y'={f3n[1]},\\;Z'={f3n[2]}$\n\n")
+        md.write("## 3. Пример преобразования\n\n")
+        first_row = df_before.iloc[0]
+        md.write(f"Преобразование для точки **{first_row['Name']}**:\n\n")
+        md.write(f"- Исходные координаты:\n")
+        md.write(f"  - X = {first_row['X']} м\n")
+        md.write(f"  - Y = {first_row['Y']} м\n")
+        md.write(f"  - Z = {first_row['Z']} м\n\n")
 
-        md.write("## 4. Таблица до и после и статистика\n\n")
+        # Правильная подстановка значений в формулу
+        subs_example = {
+            X: first_row["X"],
+            Y: first_row["Y"],
+            Z: first_row["Z"],
+            **subs_common
+        }
 
-        md.write("| Name | X | Y | Z | X' | Y' | Z' |\n")
-        md.write("|---|---|---|---|---|---|---|\n")
-        for b,a in zip(df_before.itertuples(), df_after.itertuples()):
-            md.write(f"|{b.Name}|{b.X:.6f}|{b.Y:.6f}|{b.Z:.6f}"
-                     f"|{a.X_new:.6f}|{a.Y_new:.6f}|{a.Z_new:.6f}|\n")
+        # Вычисляем каждую часть формулы отдельно для наглядности
+        rotation_matrix = Matrix([
+            [1, subs_example[ωz], -subs_example[ωy]],
+            [-subs_example[ωz], 1, subs_example[ωx]],
+            [subs_example[ωy], -subs_example[ωx], 1]
+        ])
 
-        md.write("\n**Статистика (X', Y', Z'):**\n\n")
-        stats = df_after[["X_new","Y_new","Z_new"]].agg(["mean","std"])
-        for idx in stats.index:
-            s = stats.loc[idx]
-            md.write(f"- {idx}: X'={s['X_new']:.3f}, Y'={s['Y_new']:.3f}, Z'={s['Z_new']:.3f}\n")
+        scale_factor = (1 + subs_example[m])
+        original_vector = Matrix([[subs_example[X]], [subs_example[Y]], [subs_example[Z]]])
+        translation_vector = Matrix([[subs_example[ΔX]], [subs_example[ΔY]], [subs_example[ΔZ]]])
+
+        # Формула с подставленными значениями
+        formula_parts = [
+            f"{scale_factor:.8f} × {latex(rotation_matrix)} × {latex(original_vector)} + {latex(translation_vector)}"
+        ]
+
+        md.write("- Формула с подставленными значениями:\n\n")
+        for part in formula_parts:
+            md.write(f"$$\n{part}\n$$\n\n")
+
+        # Численный результат
+        result = scale_factor * (rotation_matrix @ original_vector) + translation_vector
+        md.write(f"- Численный результат:\n")
+        md.write(f"  - X' = {float(result[0]):.6f} м\n")
+        md.write(f"  - Y' = {float(result[1]):.6f} м\n")
+        md.write(f"  - Z' = {float(result[2]):.6f} м\n\n")
+
+        md.write("## 4. Таблица преобразованных координат\n\n")
+        md.write("| Название точки | X (м) | Y (м) | Z (м) | X' (м) | Y' (м) | Z' (м) |\n")
+        md.write("|----------------|-------|-------|-------|--------|--------|--------|\n")
+        for _, (before, after) in enumerate(zip(df_before.itertuples(), df_after.itertuples())):
+            md.write(f"| {before.Name} | {before.X:.6f} | {before.Y:.6f} | {before.Z:.6f} | "
+                     f"{after.X_new:.6f} | {after.Y_new:.6f} | {after.Z_new:.6f} |\n")
+        md.write("\n")
+
+        md.write("## 5. Статистика преобразованных координат\n\n")
+        stats = df_after[["X_new", "Y_new", "Z_new"]].describe().loc[["mean", "std", "min", "max"]]
+        md.write("| Метрика | X' (м) | Y' (м) | Z' (м) |\n")
+        md.write("|---------|--------|--------|--------|\n")
+        for stat in stats.index:
+            md.write(
+                f"| {stat} | {stats.loc[stat, 'X_new']:.6f} | {stats.loc[stat, 'Y_new']:.6f} | {stats.loc[stat, 'Z_new']:.6f} |\n")
 
     return df_after
-
 
 # ---------------------
 # Маршруты FastAPI
